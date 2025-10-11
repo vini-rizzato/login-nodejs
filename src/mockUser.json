@@ -1,6 +1,7 @@
 {
     "userDado": {
-        "name": "cristiano",
-        "password": "senha"
+        "index": "0",
+        "nome": "cristiano",
+        "senha": "senha"
     }
 }
