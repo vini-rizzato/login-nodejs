@@ -11,14 +11,11 @@ regRouter.get("/register", (req, res) => {
 regRouter.post("/register", async (req, res) => {
     try{
         const userDados = req.body;
-        bcrypt.hash(userDados.senha, 10, (err, hashedSenha) => {
-            if(err) throw err;
-            console.log("Senha Hashed", hashedSenha);
-        })
+        const hashedSenha = await bcrypt.hash(userDados.senha, 10);
         await User.create({
             nome: userDados.nome,
             email: userDados.email,
-            senha: userDados.senha
+            senha: hashedSenha
         })
         res.send("Usuário criado");
     }catch{

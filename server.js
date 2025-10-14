@@ -15,6 +15,5 @@ app.listen(PORT, () => {
     console.log(`Servidor ouvindo em ${PORT}`);
 });
 
-console.log(`dotenv: ${process.env.JWT_KEY}`);
 
 //how to use jwt to set a password encrypted and set a token for a user
