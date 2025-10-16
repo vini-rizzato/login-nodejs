@@ -127,11 +127,3 @@ O arquivo .env não está listado no .gitignore por conveniência, facilitando a
 
 Este é um projeto de aprendizado, com foco em demonstrar os conceitos de autenticação, criptografia e integração com banco de dados.
 
-💬 Conclusão
-
-Este projeto serve como uma base sólida para sistemas de autenticação com Node.js e MongoDB, permitindo fácil expansão para inclusão de rotas protegidas, autorização por níveis de acesso, integração com front-end e muito mais.
-
-
----
-
-Quer que eu adicione uma última seção “📚 Próximos Passos / Melhorias Futuras” no final para deixar o README ainda mais completo (estilo projeto profissional no GitHub)?
