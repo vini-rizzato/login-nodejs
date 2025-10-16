@@ -5,63 +5,100 @@ import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 
 dotenv.config();
-const secretKey = process.env.JWT_KEY;
 
 const loginRouter = express.Router();
 
-loginRouter.get("/login", (req, res) => {
-    res.send("Login");
+loginRouter.get("/login/:id", async (req, res) => {
+    const paramUser = req.params.id;
+
+    try{
+        const findUser = await User.findOne({ nome: paramUser });
+
+        if(!findUser){
+            return res.status(404).json({ error: "Usuário não encontrado." })
+        }
+        res.send("Usuário encontrado\n" + findUser);
+    }catch(err){
+        res.status(500).send("Erro de servidor.")
+    }
+
+
 });
 
 loginRouter.post("/login", async (req, res) => {
-    const userDados = req.body;
+    const { nome, senha } = req.body;
+    try{
 
-        try{
-            const authUser = await User.findOne({ nome: userDados.nome });
-
-            const comparaSenha = await bcrypt.compare(userDados.senha, authUser.senha);
-            console.log(comparaSenha);
-            console.log(process.env.JWT_KEY);
-
-            if(comparaSenha){
-                const token = jwt.sign({ nome: authUser.nome }, process.env.JWT_KEY, { expiresIn: "1d", subject: "1" });
-                console.log(token);
-                res.send(token);
-            }
-        }catch(err){
-            console.error("Erro ao autenticar usuário");
-            res.status(404).send("Erro ao autenticar");
+        if(!nome || !senha){
+            return res.status(400).json({ error: "Todos os campos são obrigatórios." });
         }
+
+        const authUser = await User.findOne({ nome });
+
+        if(!authUser){
+            return res.status(404).json({ error: "Usuário não encontrado." });
+        }
+
+        const comparaSenha = await bcrypt.compare(senha, authUser.senha);
+
+        console.log(comparaSenha);
+        console.log(process.env.JWT_KEY);
+
+        if(comparaSenha){
+            const token = jwt.sign({ nome: nome }, process.env.JWT_KEY, { expiresIn: "1d", subject: "1" });
+            console.log(token);
+            return res.status(200).json({ message: "Login bem-sucedido!", token });
+        }else{
+            return res.status(401).json({ error: "Senha incorreta." });
+        }
+    }catch(err){
+        res.status(500).send("Erro interno");
+    }
 })
 
 loginRouter.delete("/login", async (req, res) => {
-    const userDados = req.body;
+    const { nome } = req.body;
 
-    try{
-        const findUser = await User.findOne({ nome: userDados.nome });
+    try {
+        if (!nome) {
+            return res.status(400).json({ error: "O campo 'nome' é obrigatório." });
+        }
+
+        const findUser = await User.findOne({ nome });
+        if (!findUser) {
+            return res.status(404).json({ error: "Usuário não encontrado." });
+        }
 
         await findUser.deleteOne();
-        res.send("Usuário deletado");
-    }catch(err){
-        res.status(400).send("Erro ao deletar usuário");
+        res.status(200).json({ message: "Usuário deletado com sucesso." });
+    } catch (err) {
+        console.error("Erro ao deletar usuário:", err);
+        res.status(500).json({ error: "Erro interno no servidor." });
     }
-})
+});
 
-loginRouter.put("/login", async(req, res) => {
-    const userDados = req.body;
+loginRouter.put("/login", async (req, res) => {
+    const { nome, senha } = req.body;
 
+    try {
+        if (!nome || !senha) {
+            return res.status(400).json({ error: "Nome e nova senha são obrigatórios." });
+        }
 
+        const findUser = await User.findOne({ nome });
+        if (!findUser) {
+            return res.status(404).json({ error: "Usuário não encontrado." });
+        }
 
-    try{
-        const findUser = await User.findOne({ nome: userDados.nome });
+        const hashedSenha = await bcrypt.hash(senha, 10);
+        await User.updateOne({ nome }, { senha: hashedSenha });
 
-        const hashedSenha = await bcrypt.hash(userDados.senha, 10);
-
-        await User.updateOne(findUser, {senha: hashedSenha});
-        res.send("Senha do usuário atualizada");
-    }catch(err){
-        res.status(400).send("Falha ao atualizar a senha do usuário");
+        res.status(200).json({ message: "Senha atualizada com sucesso." });
+    } catch (err) {
+        console.error("Erro ao atualizar senha:", err);
+        res.status(500).json({ error: "Erro interno no servidor." });
     }
-})
+});
+
 
 export default loginRouter;
