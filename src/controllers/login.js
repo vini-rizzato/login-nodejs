@@ -10,13 +10,11 @@ const secretKey = process.env.JWT_KEY;
 const loginRouter = express.Router();
 
 loginRouter.get("/login", (req, res) => {
-
+    res.send("Login");
 });
 
 loginRouter.post("/login", async (req, res) => {
     const userDados = req.body;
-
-//    const token = jwt.sign({ nome: mockUser.nome, senha: mockUser.senha }, process.env.JWT_KEY, { expiresIn: "1y", subject: "1"});
 
         try{
             const authUser = await User.findOne({ nome: userDados.nome });
@@ -34,6 +32,36 @@ loginRouter.post("/login", async (req, res) => {
             console.error("Erro ao autenticar usuário");
             res.status(404).send("Erro ao autenticar");
         }
+})
+
+loginRouter.delete("/login", async (req, res) => {
+    const userDados = req.body;
+
+    try{
+        const findUser = await User.findOne({ nome: userDados.nome });
+
+        await findUser.deleteOne();
+        res.send("Usuário deletado");
+    }catch(err){
+        res.status(400).send("Erro ao deletar usuário");
+    }
+})
+
+loginRouter.put("/login", async(req, res) => {
+    const userDados = req.body;
+
+
+
+    try{
+        const findUser = await User.findOne({ nome: userDados.nome });
+
+        const hashedSenha = await bcrypt.hash(userDados.senha, 10);
+
+        await User.updateOne(findUser, {senha: hashedSenha});
+        res.send("Senha do usuário atualizada");
+    }catch(err){
+        res.status(400).send("Falha ao atualizar a senha do usuário");
+    }
 })
 
 export default loginRouter;

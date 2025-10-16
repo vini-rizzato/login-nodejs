@@ -7,7 +7,7 @@ const Rotas = express.Router();
 Rotas.use("/", loginRouter);
 Rotas.use("/", regRouter)
 Rotas.get("/", (req, res) => {
-    res.send("edson praga");
+    res.send("b.b king");
 });
 
 export default Rotas;
